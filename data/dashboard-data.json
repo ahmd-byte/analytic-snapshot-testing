@@ -1,0 +1,16 @@
+{
+  "channel": {
+    "name": "CallyKo🎀🐾",
+    "url": "https://www.youtube.com/@Callyko17/videos",
+    "handle": "@Callyko17",
+    "trial": true
+  },
+  "generatedAt": "2026-11-13T14:08:49.130Z",
+  "latestSnapshot": null,
+  "latestStatus": "Failed",
+  "latestFailure": "page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('ytd-rich-grid-media, ytd-grid-video-renderer, #channel-header') to be visible\u001b[22m\n",
+  "metrics": null,
+  "noChanges": false,
+  "series": [],
+  "videos": []
+}

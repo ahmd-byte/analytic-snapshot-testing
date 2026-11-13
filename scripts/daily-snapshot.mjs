@@ -92,18 +92,25 @@ async function readPublicChannel() {
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } })
     await page.goto(LOCKED_URL, { waitUntil: 'domcontentloaded', timeout: 25000 })
-    await page.waitForSelector('ytd-rich-grid-media, ytd-grid-video-renderer, #channel-header', { timeout: 12000 })
+    await page.waitForSelector('a[href*="/watch"], #channel-name, #channel-header', { state: 'attached', timeout: 12000 })
     const data = await page.evaluate(() => {
       const text = (selector, root = document) => root.querySelector(selector)?.textContent?.trim() || ''
-      const cards = [...document.querySelectorAll('ytd-rich-grid-media, ytd-grid-video-renderer')]
+      const pageText = document.body.innerText || ''
+      const cards = [...document.querySelectorAll('ytd-rich-grid-media, ytd-grid-video-renderer, .ytLockupViewModelHost')]
       const videos = cards.map((card, index) => {
-        const titleEl = card.querySelector('#video-title-link, a#video-title')
+        const links = [...card.querySelectorAll('a[href*="/watch"]')]
+        const titleEl = card.querySelector('#video-title-link, a#video-title') || links.sort((a, b) => (b.textContent?.trim().length || 0) - (a.textContent?.trim().length || 0))[0]
         const meta = [...card.querySelectorAll('#metadata-line span, #metadata-line yt-formatted-string')].map((item) => item.textContent.trim()).filter(Boolean)
-        const details = card.querySelector('#details')?.textContent || ''
-        const duration = text('ytd-thumbnail-overlay-time-status-renderer span', card)
-        return { title: titleEl?.textContent?.trim() || '', url: titleEl?.href || '', publishDate: meta.find((item) => /ago$|streamed|premiered|\d{4}/i.test(item)) || '', viewsText: meta.find((item) => /views?/i.test(item)) || (details.match(/[\d,.]+[KMB]?\s+views?/i)?.[0] || ''), duration, position: index + 1 }
+        const lines = (card.innerText || '').split('\n').map((line) => line.trim()).filter(Boolean)
+        const details = lines.join(' ')
+        const duration = text('ytd-thumbnail-overlay-time-status-renderer span', card) || links.map((link) => link.textContent?.trim() || '').find((value) => /^\d{1,2}:\d{2}(?::\d{2})?$/.test(value)) || ''
+        const publishDate = meta.find((item) => /ago$|streamed|premiered|lalu/i.test(item)) || lines.find((line) => /ago$|streamed|premiered|lalu/i.test(line)) || ''
+        const viewsText = meta.find((item) => /views?/i.test(item)) || (details.match(/[\d,.]+[KMB]?\s+views?/i)?.[0] || '') || lines.find((line) => /^[\d,.]+[KMB]?$/i.test(line) && line !== duration) || ''
+        return { title: titleEl?.textContent?.trim() || '', url: titleEl?.href || '', publishDate, viewsText, duration, position: index + 1 }
       }).filter((video) => video.title && video.url)
-      return { name: text('#channel-name #text, #channel-name'), handle: text('#channel-handle'), subscribersText: text('#subscriber-count'), description: text('#description-container, #description'), videos }
+      const subscriberMatch = pageText.match(/([\d,.]+\s*[KMB]?)\s+(?:subscribers|pelanggan)/i)
+      const descriptionMatch = pageText.match(/(?:\d+\s+(?:videos|video))\s*\n([\s\S]*?)\n(?:\.\.\.lagi|more|Subscribe|Langgan)/i)
+      return { name: text('#channel-name #text, #channel-name') || (document.title || '').replace(/\s+-\s+YouTube$/, ''), handle: text('#channel-handle') || (pageText.match(/@Callyko17/i)?.[0] || ''), subscribersText: text('#subscriber-count') || subscriberMatch?.[1] || '', description: text('#description-container, #description') || descriptionMatch?.[1]?.trim() || '', videos }
     })
     if (data.handle.toLowerCase() !== '@callyko17' && !page.url().toLowerCase().includes('@callyko17')) throw new Error('Locked channel verification failed; the loaded page was not @Callyko17.')
     if (!data.videos.length) throw new Error('No public videos were readable from the locked channel page.')
@@ -115,10 +122,18 @@ const workbook = openWorkbook()
 const daily = readSheet(workbook, 'Daily Snapshots', dailyHeaders)
 const videos = readSheet(workbook, 'Video Snapshots', videoHeaders)
 const today = localDay()
-if (daily.some((row) => row['Snapshot date'] === today)) {
+const todayIndex = daily.findIndex((row) => row['Snapshot date'] === today)
+const refreshToday = process.argv.includes('--refresh-today')
+if (todayIndex >= 0 && daily[todayIndex]['Run status'] !== 'Failed' && !refreshToday) {
   save(workbook, daily, videos)
   console.log(`Snapshot already exists for ${today}; no duplicate created.`)
   process.exit(0)
+}
+if (todayIndex >= 0) {
+  const failedTimestamp = daily[todayIndex]['Snapshot date and time']
+  daily.splice(todayIndex, 1)
+  for (let index = videos.length - 1; index >= 0; index -= 1) if (videos[index]['Snapshot date and time'] === failedTimestamp) videos.splice(index, 1)
+  console.log(`${refreshToday ? 'Refreshing' : 'Retrying'} the ${daily[todayIndex]?.['Run status'] === 'Failed' ? 'failed ' : ''}snapshot for ${today} without creating a duplicate.`)
 }
 
 const timestamp = new Date().toISOString()

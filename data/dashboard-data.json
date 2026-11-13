@@ -5,12 +5,58 @@
     "handle": "@Callyko17",
     "trial": true
   },
-  "generatedAt": "2026-11-13T14:08:49.130Z",
-  "latestSnapshot": null,
-  "latestStatus": "Failed",
-  "latestFailure": "page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('ytd-rich-grid-media, ytd-grid-video-renderer, #channel-header') to be visible\u001b[22m\n",
-  "metrics": null,
+  "generatedAt": "2026-11-13T14:17:10.365Z",
+  "latestSnapshot": "2026-11-13T14:17:08.310Z",
+  "latestStatus": "Completed",
+  "latestFailure": null,
+  "metrics": {
+    "subscribers": 66,
+    "totalVideos": 3,
+    "totalViews": 1262,
+    "averageViews": 421,
+    "latestVideoViews": 229,
+    "addedVideos": 0
+  },
   "noChanges": false,
-  "series": [],
-  "videos": []
+  "series": [
+    {
+      "date": "2026-11-13",
+      "timestamp": "2026-11-13T14:17:08.310Z",
+      "subscribers": 66,
+      "totalViews": 1262,
+      "uploads": 0
+    }
+  ],
+  "videos": [
+    {
+      "title": "Spend a week in my life | getting out of a rut ! ✨🎀🐾",
+      "url": "https://www.youtube.com/watch?v=CPaEDyWbAB0",
+      "publishDate": "6 bln lalu",
+      "duration": "36:08",
+      "views": 229,
+      "position": 1,
+      "isNew": true,
+      "viewChange": null
+    },
+    {
+      "title": "My Ideal Morning Routine ! ✨☀️ | It doesn’t have to Start on a Monday- Ch. 1 🎀🐾",
+      "url": "https://www.youtube.com/watch?v=tGWArD30hmo",
+      "publishDate": "8 bln lalu",
+      "duration": "27:12",
+      "views": 241,
+      "position": 2,
+      "isNew": true,
+      "viewChange": null
+    },
+    {
+      "title": "My First Youtube Video 2026 | Get to Know Me! 🎀🐾",
+      "url": "https://www.youtube.com/watch?v=ylD_H1fI2vk",
+      "publishDate": "9 bln lalu",
+      "duration": "26:43",
+      "views": 792,
+      "position": 3,
+      "isNew": true,
+      "viewChange": null
+    }
+  ]
 }
